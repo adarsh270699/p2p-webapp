@@ -16,7 +16,7 @@ let isAvailableForTransfer = true;
 
 let end: NodeJS.Timeout;
 
-const TTL: number = 10000;
+const TTL: number = 120000;
 
 const sendSignal = (
     event: string,
