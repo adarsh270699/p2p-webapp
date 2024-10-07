@@ -173,7 +173,7 @@ const handleOnCandidate = async (candidate: RTCIceCandidate) => {
     console.log("handleOnCandidate", pc?.connectionState);
     setTimeout(() => {
         pc?.addIceCandidate(candidate);
-    }, 1000);
+    }, 0);
 };
 
 export { initSignal, initTransfer, initFile, initTransferCallbacks };
