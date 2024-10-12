@@ -5,6 +5,7 @@ import { useContext, useState, useEffect } from "react";
 import { PeerSelector } from "./peerSelectorCard";
 import { CopyRoomIdCard } from "./copyRoomIdCard";
 import { JoinRoomCard } from "./joinRoomCard";
+import { ConnectionStatus } from "./connectionStatus";
 import { fetchRoom } from "@/lib/roomUtils";
 import { UploadFileCard } from "./uploadFileCard";
 import { SendFileCard } from "./sendFileCard";
@@ -20,6 +21,7 @@ import {
 
 export function Room() {
   const socket = useContext(SocketContext);
+  const [isConnected, setIsConnected] = useState(false);
   const [roomState, setRoomState] = useState<RoomState>();
   const [updatedRoomState, setUpdatedRoomState] = useState<RoomState>();
   const [selectedPeer, setSelectedPeer] = useState("");
@@ -72,6 +74,10 @@ export function Room() {
   }, [updatedRoomState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    socket.on("connect", () => {
+      console.log("connected");
+    });
+
     socket.on("room-updated", async () => {
       if (socket.connected && socket.id) {
         const res = await fetchRoom(socket.id);
@@ -117,9 +123,16 @@ export function Room() {
     }
   }, [selectedPeer]);
 
+  useEffect(() => {
+    setIsConnected(socket.connected);
+  }, [socket.connected]);
+
   return (
-    <div className="w-full h-fit  py-10 flex">
-      <div className="container px-2 m-auto md:grid md:grid-cols-4 md:gap-1  space-y-1 md:space-y-0">
+    <div className="w-full h-fit py-10 flex">
+      <div className="container px-2 m-auto md:grid md:grid-cols-4 md:gap-1 space-y-1 md:space-y-0">
+        <div className="col-span-4">
+          <ConnectionStatus isConnected={isConnected} />
+        </div>
         <div className="col-span-1 h-16">
           <CopyRoomIdCard roomState={roomState} />
         </div>
