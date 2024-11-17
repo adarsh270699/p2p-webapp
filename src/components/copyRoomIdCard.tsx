@@ -8,26 +8,27 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "./ui/tooltip";
-interface Props {
-    roomState: RoomState | undefined;
-}
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
-export const CopyRoomIdCard = ({ roomState }: Props) => {
+export const CopyRoomIdCard = () => {
     const { toast } = useToast();
-
+    const roomState = useSelector((state: RootState) => {
+        return state.room;
+    });
     return (
         <Card className="h-full w-full flex flex-row items-center space-x-2 p-2">
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            disabled={!roomState}
+                            disabled={!roomState.room.id}
                             className="m-auto h-full w-full rounded-lg flex gap-2"
                             onClick={() => {
-                                if (roomState && roomState.peer.roomId) {
+                                if (roomState.room.id) {
                                     try {
                                         navigator.clipboard.writeText(
-                                            roomState.peer.roomId
+                                            roomState.room.id
                                         );
                                         toast({
                                             title: "Room ID Copied",
@@ -46,7 +47,7 @@ export const CopyRoomIdCard = ({ roomState }: Props) => {
                         <p className="text-sm ">
                             Room ID:&nbsp;
                             <span className="font-bold">
-                                {roomState?.peer.roomId}
+                                {roomState.room.id}
                             </span>
                         </p>
                     </TooltipContent>

@@ -18,7 +18,7 @@ export const readAndSendFile = (file: File, dc: RTCDataChannel) => {
         dc.send(`size;${file.size}`);
 
         const fileSize = file.size;
-        const chunkSize = 16 * 1024; // bytes
+        const chunkSize = 16 * 1024;
         let offset = 0;
 
         const readEventHandler = function (

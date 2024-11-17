@@ -27,15 +27,15 @@ type Peer = {
     id: string;
     roomId: string;
     name: string;
-    lastActive: Date;
-    createdAt: Date;
+    lastActive: string;
+    createdAt: string;
 };
 
 type Room = {
     id: string;
     peers: { string: Peer };
-    lastActive: Date;
-    createdAt: Date;
+    lastActive: string;
+    createdAt: string;
 };
 
 type RoomState = {
@@ -62,19 +62,6 @@ type AnswerPacket = {
     candidates: RTCIceCandidate[];
 };
 
-type ConnectionState = {
-    isConnecting: boolean;
-    isP2Pconnected: boolean;
-    isSendingFile: boolean;
-    isRecievingFile: boolean;
-    outgoingFileName: string;
-    outgoingFileSize: number;
-    outgoingFileProgress: number;
-    incomingFileName: string;
-    incomingFileSize: number;
-    incomingFileProgress: number;
-};
-
 type P2pDescription = {
     sdp: string | undefined;
     type: RTCSdpType;
@@ -85,7 +72,7 @@ type DescriptionCandidatePacket = {
     candidates: RTCIceCandidate[];
 };
 
-type FileTransferState = {
+type InFlightFileState = {
     name: string;
     size: number;
     type: string;
@@ -93,6 +80,21 @@ type FileTransferState = {
     totalPackets: number;
     percent: number;
     speed: number;
+};
+
+type FtState = {
+    selectedPeer: string;
+    isFileSelected: boolean;
+    fileMetaData: FileMetaData;
+    isDcConnected: boolean;
+    inFlightFileState: InFlightFileState;
+};
+
+type FileMetaData = {
+    name: string;
+    type: string;
+    lastModified: number;
+    size: number;
 };
 
 /* eslint-disable @typescript-eslint/no-unused-vars */

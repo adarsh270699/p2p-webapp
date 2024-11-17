@@ -11,21 +11,27 @@ import { Separator } from "./ui/separator";
 import { SocketContext } from "../contexts/socketContext";
 import { useContext } from "react";
 import { MoveRight } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { stat } from "fs";
 
-interface Props {
-    file: File | null;
-    roomState: RoomState | undefined;
-    selectedPeer: string;
-}
-
-export const SendFileCard = ({ file, roomState, selectedPeer }: Props) => {
+export const SendFileCard = () => {
     const socket = useContext(SocketContext);
-
+    const roomState = useSelector((state: RootState) => {
+        return state.room;
+    });
+    const ftState = useSelector((state: RootState) => {
+        return state.ft;
+    });
     const handleSend = () => {
-        if (roomState && file) {
+        if (
+            roomState.room.id &&
+            ftState.isFileSelected &&
+            ftState.selectedPeer
+        ) {
             const transaction: Transaction = {
-                from: roomState?.peer.id,
-                to: selectedPeer,
+                from: roomState.peer.id,
+                to: ftState.selectedPeer,
                 event: "init-transfer-reciever",
                 data: null,
             };
@@ -33,7 +39,7 @@ export const SendFileCard = ({ file, roomState, selectedPeer }: Props) => {
         }
     };
     return (
-        <Card className="h-full w-full" isloading={!roomState}>
+        <Card className="h-full w-full" isloading={!roomState.room.id}>
             <CardHeader className="">
                 <CardTitle>Step 3</CardTitle>
                 <CardDescription>Send file.</CardDescription>
@@ -42,11 +48,10 @@ export const SendFileCard = ({ file, roomState, selectedPeer }: Props) => {
             <CardContent>
                 <Button
                     onClick={handleSend}
-                    disabled={!file}
+                    disabled={!ftState.isFileSelected || !ftState.selectedPeer}
                     className="h-full w-full rounded-lg flex items-center justify-center gap-2"
                 >
                     <span>Send File</span>
-
                     <MoveRight className="w-6 h-6 text-blue-600" />
                 </Button>
             </CardContent>

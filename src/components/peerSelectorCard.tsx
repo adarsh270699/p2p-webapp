@@ -8,46 +8,42 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { PeerBtn } from "./peerBtn";
 import { useState, Dispatch, SetStateAction, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { stat } from "fs";
 
-interface Props {
-    roomState: RoomState | undefined;
-    selectedPeer: string;
-    setSelectedPeer: Dispatch<SetStateAction<string>>;
-}
-
-export const PeerSelector = ({
-    roomState,
-    selectedPeer,
-    setSelectedPeer,
-}: Props) => {
+export const PeerSelector = () => {
     const maxPeers = 4;
+    const roomState = useSelector((state: RootState) => {
+        return state.room;
+    });
+    const ftState = useSelector((state: RootState) => {
+        return state.ft;
+    });
     const [peers, setPeers] = useState<JSX.Element[]>();
 
     useEffect(() => {
         let counter = 0;
         const newPeers = [];
-        if (roomState) {
-            for (const [k, v] of Object.entries(roomState.room.peers)) {
-                const isDisabled = false;
-                const isSelf = roomState.peer.id === k;
-                const isSelected = selectedPeer === k;
-                const peerName = v.name;
-                const peerId = k;
+        for (const [k, v] of Object.entries(roomState.room.peers)) {
+            const isDisabled = false;
+            const isSelf = roomState.peer.id === k;
+            const isSelected = ftState.selectedPeer === k;
+            const peerName = v.name;
+            const peerId = k;
 
-                newPeers.push(
-                    <PeerBtn
-                        isDisabled={isDisabled}
-                        isSelected={isSelected}
-                        isSelf={isSelf}
-                        setSelectedPeer={isSelf ? () => {} : setSelectedPeer}
-                        peerName={peerName}
-                        peerId={peerId}
-                        iconVal={counter}
-                        key={counter}
-                    ></PeerBtn>
-                );
-                counter++;
-            }
+            newPeers.push(
+                <PeerBtn
+                    isDisabled={isDisabled}
+                    isSelected={isSelected}
+                    isSelf={isSelf}
+                    peerName={peerName}
+                    peerId={peerId}
+                    iconVal={counter}
+                    key={counter}
+                ></PeerBtn>
+            );
+            counter++;
         }
         while (counter < maxPeers) {
             newPeers.push(
@@ -55,7 +51,6 @@ export const PeerSelector = ({
                     isDisabled={true}
                     isSelected={false}
                     isSelf={false}
-                    setSelectedPeer={() => {}}
                     peerName={"Invite more peers."}
                     peerId={"NA"}
                     iconVal={7}
@@ -65,10 +60,10 @@ export const PeerSelector = ({
             counter++;
         }
         setPeers(newPeers);
-    }, [roomState, selectedPeer]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [roomState.room.peers, ftState.selectedPeer]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <Card className="h-full w-full" isloading={!roomState}>
+        <Card className="h-full w-full" isloading={!roomState.room.id}>
             <CardHeader>
                 <CardTitle>Step 1</CardTitle>
                 <CardDescription>Select a peer from the room.</CardDescription>

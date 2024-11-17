@@ -1,3 +1,6 @@
+import { useSelector } from "react-redux";
+
+import { RootState } from "@/store/store";
 import { FileUploadArea } from "./fileUploadArea";
 import {
     Card,
@@ -7,34 +10,24 @@ import {
     CardTitle,
 } from "./ui/card";
 import { Separator } from "./ui/separator";
-import { Dispatch, SetStateAction } from "react";
 
-interface Props {
-    roomState: RoomState | undefined;
-    isUploadDisabled: boolean;
-    file: File | null;
-    setFile: Dispatch<SetStateAction<File | null>>;
-}
+export const UploadFileCard = () => {
+    const roomState = useSelector((state: RootState) => {
+        return state.room;
+    });
 
-export const UploadFileCard = ({
-    roomState,
-    isUploadDisabled,
-    file,
-    setFile,
-}: Props) => {
     return (
-        <Card className="h-full w-full flex flex-col" isloading={!roomState}>
+        <Card
+            className="h-full w-full flex flex-col"
+            isloading={!roomState.room.id}
+        >
             <CardHeader className="">
                 <CardTitle>Step 2</CardTitle>
                 <CardDescription>Upload a file.</CardDescription>
                 <Separator />
             </CardHeader>
             <CardContent>
-                <FileUploadArea
-                    isDisabled={isUploadDisabled}
-                    file={file}
-                    setFile={setFile}
-                />
+                <FileUploadArea />
             </CardContent>
         </Card>
     );

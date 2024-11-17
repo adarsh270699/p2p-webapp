@@ -1,7 +1,7 @@
 "use client";
 import { serviceConfig } from "@/config/config";
 
-const fetchRoom = async function name(peerId: string): Promise<Result> {
+export const fetchRoom = async function name(peerId: string): Promise<Result> {
     const res: Result = { success: false, data: null, msg: null };
     const baseUrl: string = serviceConfig.baseUrl;
 
@@ -15,7 +15,6 @@ const fetchRoom = async function name(peerId: string): Promise<Result> {
             room: Room;
         };
     };
-
     try {
         response = await (await fetch(url)).json();
     } catch {
@@ -47,5 +46,3 @@ const fetchRoom = async function name(peerId: string): Promise<Result> {
     res.data = newSate;
     return res;
 };
-
-export { fetchRoom };

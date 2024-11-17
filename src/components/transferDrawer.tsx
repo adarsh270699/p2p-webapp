@@ -10,18 +10,16 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
-interface TransferDrawerProps {
-    isOpen: boolean;
-    fileTransferPercent: number;
-}
+export function TransferDrawer() {
+    const ftState = useSelector((state: RootState) => {
+        return state.ft;
+    });
 
-export function TransferDrawer({
-    isOpen,
-    fileTransferPercent,
-}: TransferDrawerProps) {
     return (
-        <Drawer open={isOpen}>
+        <Drawer open={ftState.isDcConnected}>
             <DrawerTrigger asChild></DrawerTrigger>
             <DrawerContent className=" bg-black border-zinc-800 w-full border">
                 <div className="w-full flex flex-col">
@@ -30,14 +28,16 @@ export function TransferDrawer({
                             Transfer Progress
                         </DrawerTitle>
                         <DrawerDescription className="mx-auto">
-                            {fileTransferPercent}%
+                            {ftState.inFlightFileState.percent.toFixed(2)}%
                         </DrawerDescription>
                     </DrawerHeader>
 
                     <div className=" mx-auto w-full flex justify-center">
                         <Progress
                             className="w-[90%] h-2 text-white"
-                            value={fileTransferPercent}
+                            value={parseFloat(
+                                ftState.inFlightFileState.percent.toFixed(2)
+                            )}
                         />
                     </div>
 

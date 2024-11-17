@@ -1,17 +1,16 @@
 export const initIncomingDataManager = function (
     pc: RTCPeerConnection,
     dc: RTCDataChannel,
-    fileTransferCallBack: (fileTransferState: FileTransferState) => void
+    fileTransferCallBack: (fileTransferState: InFlightFileState) => void
 ) {
-    const chunkSize: number = 16 * 1024; // 16KB chunks for better performance
-
-    let fileInfo = {
+    const chunkSize: number = 16 * 1024;
+    let startTime = 0;
+    let endTime = 0;
+    let chunks = [] as ArrayBuffer[];
+    let inFlightFileState = {
         size: 0,
-        startTime: 0,
-        endTime: 0,
         type: "",
         name: "",
-        chunks: [] as ArrayBuffer[],
         totalPackets: 0,
         receivedPackets: 0,
         percent: 0,
@@ -19,13 +18,13 @@ export const initIncomingDataManager = function (
     };
 
     const downloadFile = () => {
-        const blob = new Blob(fileInfo.chunks, {
-            type: fileInfo.type,
+        const blob = new Blob(chunks, {
+            type: inFlightFileState.type,
         });
         const objectUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = objectUrl;
-        link.setAttribute("download", fileInfo.name);
+        link.setAttribute("download", inFlightFileState.name);
         link.click();
         link.parentNode?.removeChild(link);
     };
@@ -38,63 +37,65 @@ export const initIncomingDataManager = function (
                 case "start":
                     dc.send("ack-start");
                 case "ack-start":
-                    fileInfo = {
+                    inFlightFileState = {
                         size: 0,
-                        startTime: Date.now(),
-                        endTime: 0,
                         type: "",
                         name: "",
-                        chunks: [],
                         totalPackets: 0,
                         receivedPackets: 0,
                         percent: 0,
                         speed: 0,
                     };
+                    startTime = Date.now();
+                    startTime = 0;
+                    chunks = [];
                     break;
 
                 case "fileType":
                     dc.send(`ack-filetype;${value}`);
                 case "ack-filetype":
-                    fileInfo.type = value;
+                    inFlightFileState.type = value;
                     break;
 
                 case "fileName":
                     dc.send(`ack-filename;${value}`);
                 case "ack-filename":
-                    fileInfo.name = value;
+                    inFlightFileState.name = value;
                     break;
 
                 case "size":
                     dc.send(`ack-size;${value}`);
                 case "ack-size":
-                    fileInfo.size = parseInt(value, 10);
-                    fileInfo.totalPackets = Math.ceil(
-                        fileInfo.size / chunkSize
+                    inFlightFileState.size = parseInt(value, 10);
+                    inFlightFileState.totalPackets = Math.ceil(
+                        inFlightFileState.size / chunkSize
                     );
                     break;
                 case "ack-percent":
-                    fileInfo.percent = parseFloat(value);
+                    inFlightFileState.percent = parseFloat(value);
                     break;
                 case "ack-end":
-                    fileInfo.endTime = parseInt(value, 10);
+                    endTime = parseInt(value, 10);
                     break;
             }
         } else {
-            fileInfo.chunks.push(data);
-            fileInfo.receivedPackets++;
+            chunks.push(data);
+            inFlightFileState.receivedPackets++;
 
-            fileInfo.percent =
-                (fileInfo.receivedPackets / fileInfo.totalPackets) * 100;
-            fileInfo.speed =
-                ((fileInfo.receivedPackets * chunkSize) /
-                    (Date.now() - fileInfo.startTime)) *
+            inFlightFileState.percent =
+                (inFlightFileState.receivedPackets /
+                    inFlightFileState.totalPackets) *
+                100;
+            inFlightFileState.speed =
+                ((inFlightFileState.receivedPackets * chunkSize) /
+                    (Date.now() - startTime)) *
                 1000;
 
-            dc.send(`ack-percent;${fileInfo.percent}`);
+            dc.send(`ack-percent;${inFlightFileState.percent}`);
 
-            if (fileInfo.chunks.length * chunkSize >= fileInfo.size) {
-                fileInfo.endTime = Date.now();
-                dc.send(`ack-end;${fileInfo.endTime}`);
+            if (chunks.length * chunkSize >= inFlightFileState.size) {
+                endTime = Date.now();
+                dc.send(`ack-end;${endTime}`);
                 downloadFile();
                 setTimeout(() => {
                     dc.close();
@@ -102,7 +103,7 @@ export const initIncomingDataManager = function (
                 }, 1000);
             }
         }
-        fileTransferCallBack(fileInfo);
+        fileTransferCallBack(inFlightFileState);
     };
 
     return handleDataChannelMessageReceived;

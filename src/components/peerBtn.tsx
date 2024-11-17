@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dispatch, SetStateAction } from "react";
 import { cn } from "@/lib/utils";
 import { CheckCheck } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
+import { setSelectedPeer, unSetSelectedPeer } from "@/store/slices/ftSlice";
 
 interface Props {
     iconVal: number;
@@ -13,7 +16,6 @@ interface Props {
     isSelected: boolean;
     isDisabled: boolean;
     isSelf: boolean;
-    setSelectedPeer: Dispatch<SetStateAction<string>>;
 }
 
 export const PeerBtn = ({
@@ -23,13 +25,13 @@ export const PeerBtn = ({
     isSelected,
     isDisabled,
     isSelf,
-    setSelectedPeer,
 }: Props) => {
+    const dispatch = useDispatch<AppDispatch>();
     const handleClick = () => {
         if (isSelected) {
-            setSelectedPeer("");
+            dispatch(unSetSelectedPeer());
         } else {
-            setSelectedPeer(peerId);
+            dispatch(setSelectedPeer(peerId));
         }
     };
 

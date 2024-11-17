@@ -1,175 +1,126 @@
-import * as React from "react";
+import { useContext, useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { SocketContext } from "@/contexts/socketContext";
-import { useContext, useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { AppDispatch, RootState } from "@/store/store";
+import { getRoomStateAsync } from "@/store/slices/roomSlice";
+
+import { setInFlightFileState, setIsDcConnected } from "@/store/slices/ftSlice";
+import {
+    initSignal,
+    initTransfer,
+    initTransferCallbacks,
+} from "@/lib/dcTransfer";
+
 import { PeerSelector } from "./peerSelectorCard";
 import { CopyRoomIdCard } from "./copyRoomIdCard";
 import { JoinRoomCard } from "./joinRoomCard";
 import { ConnectionStatus } from "./connectionStatus";
-import { fetchRoom } from "@/lib/roomUtils";
 import { UploadFileCard } from "./uploadFileCard";
 import { SendFileCard } from "./sendFileCard";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
 import { TransferDrawer } from "./transferDrawer";
-import {
-  initFile,
-  initSignal,
-  initTransfer,
-  initTransferCallbacks,
-} from "@/lib/dcTransfer";
 
 export function Room() {
-  const socket = useContext(SocketContext);
-  const [isConnected, setIsConnected] = useState(false);
-  const [roomState, setRoomState] = useState<RoomState>();
-  const [updatedRoomState, setUpdatedRoomState] = useState<RoomState>();
-  const [selectedPeer, setSelectedPeer] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploadDisabled, setIsUploadDisabled] = useState(true);
-  const [fileTransferPercent, setFileTransferPercent] = useState<number>(0);
-  const [isTransferring, setIsTransferring] = useState<boolean>(false);
-  const { toast } = useToast();
-
-  const fileTransferCallBack = (fileTransferState: FileTransferState) => {
-    if (Math.round(fileTransferState.percent) % 1 === 0) {
-      setFileTransferPercent(Math.round(fileTransferState.percent));
-    }
-  };
-  const dcOpenCallBack = () => {
-    setIsTransferring(true);
-  };
-  const dcCloseCallBack = () => {
-    setIsTransferring(false);
-  };
-
-  useEffect(() => {
-    initTransferCallbacks(
-      fileTransferCallBack,
-      dcOpenCallBack,
-      dcCloseCallBack
-    );
-    if (updatedRoomState) {
-      if (
-        updatedRoomState?.peer?.roomId &&
-        updatedRoomState.peer?.roomId !== roomState?.peer?.roomId
-      ) {
-        toast({
-          title: "Room Joined",
-        });
-        setRoomState(updatedRoomState);
-      }
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Unable To Join Room!",
-        description: "Reload app to create new room",
-        action: (
-          <Button onClick={() => window.location.reload()}>Reload</Button>
-        ),
-      });
-    }
-
-    setRoomState(updatedRoomState);
-  }, [updatedRoomState]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("connected");
+    const dispatch = useDispatch<AppDispatch>();
+    const socket = useContext(SocketContext);
+    const roomState = useSelector((state: RootState) => {
+        return state.room;
     });
 
-    socket.on("room-updated", async () => {
-      if (socket.connected && socket.id) {
-        const res = await fetchRoom(socket.id);
-        if (res.success) {
-          if (res.data.peer?.roomId) {
-            setUpdatedRoomState(res.data);
-          } else {
-            setUpdatedRoomState(undefined);
-          }
-        }
-      }
-    });
+    const { toast } = useToast();
 
-    socket.emit("create-room");
-
-    initSignal(socket);
-    socket.on("init-transfer-sender", (transaction: Transaction) => {
-      initTransfer(transaction, true);
-    });
-
-    socket.on("init-transfer-reciever", (transaction: Transaction) => {
-      initTransfer(transaction, false);
-    });
-
-    return () => {
-      socket.off("room-updated");
-      socket.off("init-transfer-sender");
-      socket.off("init-transfer-receiver");
+    const fileTransferCallBack = (inFlightFileState: InFlightFileState) => {
+        dispatch(setInFlightFileState({ ...inFlightFileState }));
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (file) {
-      initFile(file);
-    }
-  }, [file]);
+    const dcOpenCallBack = () => {
+        dispatch(setIsDcConnected(true));
+    };
+    const dcCloseCallBack = () => {
+        dispatch(setIsDcConnected(false));
+    };
 
-  useEffect(() => {
-    if (selectedPeer) {
-      setIsUploadDisabled(false);
-    } else {
-      setIsUploadDisabled(true);
-    }
-  }, [selectedPeer]);
+    useEffect(() => {
+        if (roomState.room.id) {
+            toast({
+                title: "Room Joined",
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Unable To Join Room!",
+                description: "Reload app to create new room",
+                action: (
+                    <Button onClick={() => window.location.reload()}>
+                        Reload
+                    </Button>
+                ),
+            });
+        }
+    }, [roomState.room.id]);
 
-  useEffect(() => {
-    setIsConnected(socket.connected);
-  }, [socket.connected]);
+    useEffect(() => {
+        initTransferCallbacks(
+            fileTransferCallBack,
+            dcOpenCallBack,
+            dcCloseCallBack
+        );
+        socket.on("connect", () => {
+            initSignal(socket);
+        });
 
-  return (
-    <div className="w-full h-fit py-10 flex">
-      <div className="container px-2 m-auto md:grid md:grid-cols-4 md:gap-1 space-y-1 md:space-y-0">
-        <div className="col-span-4">
-          <ConnectionStatus isConnected={isConnected} />
-        </div>
-        <div className="col-span-1 h-16">
-          <CopyRoomIdCard roomState={roomState} />
-        </div>
-        <div className="col-span-3 md:col-span-3 h-16">
-          <JoinRoomCard />
-        </div>
-        <div className="col-span-2 h-[425px]">
-          <PeerSelector
-            roomState={roomState}
-            selectedPeer={selectedPeer}
-            setSelectedPeer={setSelectedPeer}
-          />
-        </div>
-        <div className="col-span-2 h-[425px]">
-          <div className="h-full w-full flex flex-col gap-1 ">
-            <div className="w-full h-[300px]">
-              <UploadFileCard
-                roomState={roomState}
-                isUploadDisabled={isUploadDisabled}
-                file={file}
-                setFile={setFile}
-              />
+        socket.on("room-updated", async () => {
+            if (socket.connected && socket.id) {
+                dispatch(getRoomStateAsync(socket.id));
+            }
+        });
+
+        socket.emit("create-room");
+
+        socket.on("init-transfer-sender", (transaction: Transaction) => {
+            initTransfer(transaction, true);
+        });
+
+        socket.on("init-transfer-reciever", (transaction: Transaction) => {
+            initTransfer(transaction, false);
+        });
+
+        return () => {
+            socket.off("room-updated");
+            socket.off("init-transfer-sender");
+            socket.off("init-transfer-receiver");
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return (
+        <div className="w-full h-fit py-10 flex">
+            <div className="container px-2 m-auto md:grid md:grid-cols-4 md:gap-1 space-y-1 md:space-y-0">
+                <div className="col-span-4">
+                    <ConnectionStatus />
+                </div>
+                <div className="col-span-1 h-16">
+                    <CopyRoomIdCard />
+                </div>
+                <div className="col-span-3 md:col-span-3 h-16">
+                    <JoinRoomCard />
+                </div>
+                <div className="col-span-2 h-[425px]">
+                    <PeerSelector />
+                </div>
+                <div className="col-span-2 h-[425px]">
+                    <div className="h-full w-full flex flex-col gap-1 ">
+                        <div className="w-full h-[300px]">
+                            <UploadFileCard />
+                        </div>
+                        <div className="w-full h-[125px]">
+                            <SendFileCard />
+                        </div>
+                    </div>
+                </div>
+                <TransferDrawer />
             </div>
-            <div className="w-full h-[125px]">
-              <SendFileCard
-                file={file}
-                roomState={roomState}
-                selectedPeer={selectedPeer}
-              />
-            </div>
-          </div>
         </div>
-        <TransferDrawer
-          isOpen={isTransferring}
-          fileTransferPercent={fileTransferPercent}
-        />
-      </div>
-    </div>
-  );
+    );
 }
