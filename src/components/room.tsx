@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { SocketContext } from "@/contexts/socketContext";
@@ -59,7 +59,7 @@ export function Room() {
                 ),
             });
         }
-    }, [roomState.room.id]);
+    }, [roomState.room.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         initTransferCallbacks(

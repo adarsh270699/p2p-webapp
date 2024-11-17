@@ -1,5 +1,5 @@
+import { useContext, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useContext, useEffect, useMemo, useState } from "react";
 import { SocketContext } from "@/contexts/socketContext";
 
 export function ConnectionStatus() {

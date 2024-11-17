@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
     Card,
     CardContent,
@@ -6,11 +8,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PeerBtn } from "./peerBtn";
-import { useState, Dispatch, SetStateAction, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { stat } from "fs";
+import { PeerBtn } from "./peerBtn";
 
 export const PeerSelector = () => {
     const maxPeers = 4;

@@ -35,7 +35,7 @@ const roomSlice = createSlice({
 export const getRoomStateAsync = createAsyncThunk(
     "room/getStateAsync",
     async (peerId: string) => {
-        let res = await fetchRoom(peerId);
+        const res = await fetchRoom(peerId);
         try {
             if (res.success) {
                 if (res.data.peer?.roomId) {
@@ -43,9 +43,7 @@ export const getRoomStateAsync = createAsyncThunk(
                 }
             }
             throw "error getting room data";
-        } catch (e: any) {
-            console.log(e);
-        }
+        } catch {}
     }
 );
 

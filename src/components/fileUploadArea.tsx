@@ -1,13 +1,13 @@
-import { Button } from "./ui/button";
 import { ChangeEvent } from "react";
-
-import { File, ArrowUpToLine } from "lucide-react";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { useDispatch, useSelector } from "react-redux";
+import { File, ArrowUpToLine } from "lucide-react";
 import { AppDispatch, RootState } from "@/store/store";
 import { setIsFileSelected } from "@/store/slices/ftSlice";
 import { initFile } from "@/lib/dcTransfer";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+
 export const FileUploadArea = () => {
     const ftState = useSelector((state: RootState) => {
         return state.ft;

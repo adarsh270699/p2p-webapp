@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
+import { Plus } from "lucide-react";
+import { SocketContext } from "@/contexts/socketContext";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
-import { SocketContext } from "@/contexts/socketContext";
-import { Plus } from "lucide-react";
 
 export const JoinRoomCard = () => {
     const socket = useContext(SocketContext);

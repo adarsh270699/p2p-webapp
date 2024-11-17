@@ -1,13 +1,11 @@
-import { Button } from "./ui/button";
-import { PeerIcon } from "./ui/icons/peerIcon";
-import { Badge } from "@/components/ui/badge";
-
-import { Dispatch, SetStateAction } from "react";
-import { cn } from "@/lib/utils";
 import { CheckCheck } from "lucide-react";
 import { useDispatch } from "react-redux";
+import { Badge } from "@/components/ui/badge";
 import { AppDispatch } from "@/store/store";
+import { cn } from "@/lib/utils";
 import { setSelectedPeer, unSetSelectedPeer } from "@/store/slices/ftSlice";
+import { Button } from "./ui/button";
+import { PeerIcon } from "./ui/icons/peerIcon";
 
 interface Props {
     iconVal: number;

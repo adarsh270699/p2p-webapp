@@ -1,5 +1,6 @@
+import { useSelector } from "react-redux";
 import { Progress } from "@/components/ui/progress";
-
+import { RootState } from "@/store/store";
 import {
     Drawer,
     DrawerClose,
@@ -10,8 +11,6 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 
 export function TransferDrawer() {
     const ftState = useSelector((state: RootState) => {

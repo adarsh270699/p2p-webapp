@@ -1,5 +1,7 @@
+import { useContext } from "react";
+import { MoveRight } from "lucide-react";
+import { RootState } from "@/store/store";
 import { Button } from "./ui/button";
-
 import {
     Card,
     CardContent,
@@ -9,11 +11,7 @@ import {
 } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { SocketContext } from "../contexts/socketContext";
-import { useContext } from "react";
-import { MoveRight } from "lucide-react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { stat } from "fs";
 
 export const SendFileCard = () => {
     const socket = useContext(SocketContext);

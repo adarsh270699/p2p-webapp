@@ -1,15 +1,15 @@
-import { Card } from "./ui/card";
+import { useSelector } from "react-redux";
 import { Copy } from "lucide-react";
-import { Button } from "./ui/button";
+import { RootState } from "@/store/store";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "./ui/card";
+import { Button } from "./ui/button";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "./ui/tooltip";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 
 export const CopyRoomIdCard = () => {
     const { toast } = useToast();
