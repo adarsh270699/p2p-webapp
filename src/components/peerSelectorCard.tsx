@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
     Card,
     CardContent,
@@ -8,11 +8,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RootState } from "@/store/store";
+import { AppDispatch, RootState } from "@/store/store";
+import { unSetSelectedPeer } from "@/store/slices/ftSlice";
 import { PeerBtn } from "./peerBtn";
 
 export const PeerSelector = () => {
     const maxPeers = 4;
+    const dispatch = useDispatch<AppDispatch>();
     const roomState = useSelector((state: RootState) => {
         return state.room;
     });
@@ -23,6 +25,9 @@ export const PeerSelector = () => {
 
     useEffect(() => {
         let counter = 0;
+        if (!roomState.room.peers.hasOwnProperty(ftState.selectedPeer)) {
+            dispatch(unSetSelectedPeer());
+        }
         const newPeers = [];
         for (const [k, v] of Object.entries(roomState.room.peers)) {
             const isDisabled = false;
@@ -30,7 +35,6 @@ export const PeerSelector = () => {
             const isSelected = ftState.selectedPeer === k;
             const peerName = v.name;
             const peerId = k;
-
             newPeers.push(
                 <PeerBtn
                     isDisabled={isDisabled}
@@ -44,6 +48,7 @@ export const PeerSelector = () => {
             );
             counter++;
         }
+
         while (counter < maxPeers) {
             newPeers.push(
                 <PeerBtn

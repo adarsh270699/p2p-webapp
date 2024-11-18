@@ -28,7 +28,7 @@ export const PeerBtn = ({
     const handleClick = () => {
         if (isSelected) {
             dispatch(unSetSelectedPeer());
-        } else {
+        } else if (!isSelf) {
             dispatch(setSelectedPeer(peerId));
         }
     };
