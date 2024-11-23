@@ -16,7 +16,6 @@ export function TransferDrawer() {
   const inFlightState = useSelector((state: RootState) => {
     return state.inFlight;
   });
-  console.log({ ...inFlightState });
 
   const ftState = useSelector((state: RootState) => {
     return state.ft;
