@@ -33,7 +33,7 @@ export const initIncomingDataManager = function (
     const data = event.data;
     if (typeof data === "string") {
       const [key, value] = data.split(";");
-      console.log(key, value);
+
       switch (key) {
         case "start":
           dc.send(`ack-start;${value}`);
