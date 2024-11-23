@@ -25,7 +25,7 @@ export const initIncomingDataManager = function (
     const link = document.createElement("a");
     link.href = objectUrl;
     link.setAttribute("download", inFlightState.name);
-    /*   link.click(); */
+    link.click();
     link.parentNode?.removeChild(link);
   };
 
