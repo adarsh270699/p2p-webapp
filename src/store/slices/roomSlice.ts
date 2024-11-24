@@ -38,9 +38,10 @@ export const getRoomStateAsync = createAsyncThunk(
         const res = await fetchRoom(peerId);
         try {
             if (res.success) {
-                if (res.data.peer?.roomId) {
+                if (res.data.room?.id) {
                     return res.data;
                 }
+                return initialState;
             }
             throw "error getting room data";
         } catch {}
